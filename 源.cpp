@@ -18,6 +18,7 @@ int ROW = 16, COL = 16, MINE_NUM = 40;
 time_t start_time;
 time_t current_time;
 int elapsed_time;
+bool isFirstClickDone = false;          //一个布尔值，用来判定是否触发第一次保护机制
 
 void gameInit() {
     // 初始化图形界面
@@ -27,7 +28,7 @@ void gameInit() {
     int y_length = IMG_SIZE * COL;
     int x_length = IMG_SIZE * ROW + 240;
 
-    settextstyle(30, 0, _T("宋体"));         //写了好久，这里是以字符的左上角作为基准
+    settextstyle(30, 0, _T("宋体"));         //这里是以字符串的左上角作为基准
     settextcolor(WHITE);
     const char* text = "开始";
 
@@ -111,7 +112,7 @@ void gameInit() {
         }
     }
 
-    // 给所有格子加上偏移量，防止与被翻开格子冲突，也是加密数据的一种表现
+    // 给所有格子加上偏移量，防止与被翻开格子冲突，也是一种加密数据。
     for (int i = 1; i < ROW + 1; ++i) {
         for (int j = 1; j < COL + 1; ++j) {
             mine[i][j] += 20;  //只有显示为29的才是雷，在20-28之间的都是非雷格子，点击翻开格子和递归翻开格子的操作就是-20
@@ -119,6 +120,63 @@ void gameInit() {
     }
 
 }
+
+void showMenu() {
+    initgraph(400, 300);  // 创建菜单窗口
+    setbkcolor(WHITE);
+    cleardevice();
+
+    settextstyle(20, 0, _T("宋体"));
+    settextcolor(BLACK);
+    outtextxy(150, 50, _T("选择游戏难度："));
+    outtextxy(150, 100, _T("1. 简单"));
+    outtextxy(150, 140, _T("2. 中等"));
+    outtextxy(150, 180, _T("3. 困难"));
+
+    while (1) {
+        ExMessage em;
+        if (peekmessage(&em, EX_MOUSE)) {
+            if (em.message == WM_LBUTTONDOWN) {
+                if (em.x > 150 && em.x < 250 && em.y > 100 && em.y < 120) {     // 点击简单（处于坐标范围内）
+                    ROW = 9;
+                    COL = 9;
+                    MINE_NUM = 10;
+                    break;
+                }
+                else if (em.x > 150 && em.x < 250 && em.y > 140 && em.y < 160) {   // 点击中等
+                    ROW = 16;
+                    COL = 16;
+                    MINE_NUM = 40;
+                    break;
+                }
+                else if (em.x > 150 && em.x < 250 && em.y > 180 && em.y < 200) {    // 点击困难
+                    ROW = 20;
+                    COL = 20;
+                    MINE_NUM = 70;
+                    break;
+                }
+            }
+        }
+    }
+    closegraph();  // 关闭菜单窗口
+}
+
+void restartGame() {
+    isFirstClickDone = false;  // 重置第一次点击状态保证第一次保护机制。
+    // 重新初始化随机数种子
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER start;
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&start);
+    srand((unsigned int)(start.QuadPart));
+    num = 0;
+    start_time = time(NULL);        // 重置游戏开始时间
+    elapsed_time = 0;                    // 重置计时器
+    showMenu();
+    gameInit();
+}
+
+
 
 void isOver() {
     // 检查是否暴雷
@@ -135,7 +193,7 @@ void isOver() {
 
     // 如果踩雷
     if (isHitMine) {
-        int ok = MessageBox(GetHWnd(), "还要排雷吗", "你没了", MB_OKCANCEL);  //easyx的函数，弹出消息盒子
+        int ok = MessageBox(GetHWnd(), "还要排雷吗", "你失败了", MB_OKCANCEL);  //easyx的函数，弹出消息盒子
         if (ok == IDOK) {
             // 重置雷区
             for (int i = 1; i < ROW + 1; ++i) {
@@ -145,10 +203,7 @@ void isOver() {
                     }
                 }
             }
-            num = 0;
-            start_time = time(NULL);        // 重置游戏开始时间
-            elapsed_time = 0;                    // 重置计时器
-            gameInit();                        // 重新初始化雷区和图像
+            restartGame();                         // 重新初始化雷区和图像
         }
         else {
             exit(-1);  // 退出游戏
@@ -177,10 +232,7 @@ void isOver() {
         // 弹出胜利消息盒子，
         int ok = MessageBox(GetHWnd(), win_message, "恭喜你！", MB_OKCANCEL);
         if (ok == IDOK) {
-            num = 0;
-            start_time = time(NULL);       // 重置开始时间
-            elapsed_time = 0;                   // 重置时间
-            gameInit();                // 重新初始化游戏
+            restartGame();          // 重新初始化游戏
         }
         else {
             exit(0);  // 退出游戏
@@ -229,24 +281,23 @@ void openNUll(int r, int c) {   //递归实现格子展开
     }
 }
 
-void mouseClick() {                                  //处理鼠标消息函数
-    static bool firstClick = true;  // 用一个变量标记是否为第一次点击
-    ExMessage em;                                 //Easyx函数存储消息
+void mouseClick() {
+    ExMessage em;
     if (peekmessage(&em, EX_MOUSE)) {
         mx = em.y / IMG_SIZE + 1;
         my = em.x / IMG_SIZE + 1;
 
-        if (em.lbutton) {          // 鼠标左键点击
-            if (firstClick) {
-                firstClick = false;  // 标记第一次点击已完成，准备随机布雷。
+        if (em.lbutton) {
+            if (!isFirstClickDone) {  // 只有当还未进行第一次点击时，执行第一次点击相关的雷区初始化保护逻辑
+                isFirstClickDone = true;  // 标记第一次点击已完成
 
                 // 生成雷区并保护第一次点击及其周围，不能在周围生成雷
                 int protectedRow = mx;
-                int protectedCol = my;           //获取鼠标点击位置。
+                int protectedCol = my;
 
                 // 随机生成雷区
                 int row, col;
-                memset(mine, 0, sizeof(mine));  // 清空雷区，清除gameinit函数的第一次结果
+                memset(mine, 0, sizeof(mine));
                 for (int i = 0; i < MINE_NUM;) {
                     row = rand() % ROW + 1;
                     col = rand() % COL + 1;
@@ -258,7 +309,7 @@ void mouseClick() {                                  //处理鼠标消息函数
                     }
 
                     if (mine[row][col] == 0) {
-                        mine[row][col] = 9;  // 9 表示地雷
+                        mine[row][col] = 9;
                         ++i;
                     }
                 }
@@ -285,12 +336,13 @@ void mouseClick() {                                  //处理鼠标消息函数
                     }
                 }
             }
-
-            // 展开点击的格子
-            if (mine[mx][my] > 9) {
-                mine[mx][my] -= 20;
-                openNUll(mx, my);
-                num++;
+            else {
+                // 非第一次点击时，正常展开点击的格子等操作
+                if (mine[mx][my] > 9) {
+                    mine[mx][my] -= 20;
+                    openNUll(mx, my);
+                    num++;
+                }
             }
         }
         else if (em.rbutton) {  // 鼠标右键标记
@@ -304,45 +356,7 @@ void mouseClick() {                                  //处理鼠标消息函数
     }
 }
 
-void showMenu() {
-    initgraph(400, 300);  // 创建菜单窗口
-    setbkcolor(WHITE);
-    cleardevice();
 
-    settextstyle(20, 0, _T("宋体"));
-    settextcolor(BLACK);
-    outtextxy(150, 50, _T("选择游戏难度："));
-    outtextxy(150, 100, _T("1. 简单"));
-    outtextxy(150, 140, _T("2. 中等"));
-    outtextxy(150, 180, _T("3. 困难"));
-
-    while (1) {
-        ExMessage em;
-        if (peekmessage(&em, EX_MOUSE)) {
-            if (em.message == WM_LBUTTONDOWN) {
-                if (em.x > 150 && em.x < 250 && em.y > 100 && em.y < 120) {     // 点击简单（处于坐标范围内）
-                    ROW = 9;
-                    COL = 9;
-                    MINE_NUM = 10;
-                    break;
-                }
-                else if (em.x > 150 && em.x < 250 && em.y > 140 && em.y < 160) {   // 点击中等
-                    ROW = 16;
-                    COL = 16;
-                    MINE_NUM = 40;
-                    break;
-                }
-                else if (em.x > 150 && em.x < 250 && em.y > 180 && em.y < 200) {    // 点击困难
-                    ROW = 20;
-                    COL = 20;
-                    MINE_NUM = 70;
-                    break;
-                }
-            }
-        }
-    }
-    closegraph();  // 关闭菜单窗口
-}
 
 void tips() {                //棋盘右方提示函数
     current_time = time(NULL);
@@ -359,6 +373,7 @@ void tips() {                //棋盘右方提示函数
     outtextxy(IMG_SIZE * ROW + 15, 140, _T("才算游戏胜利"));
     outtextxy(IMG_SIZE * ROW + 15, 170, _T("祝你游戏愉快"));
 }
+
 
 int main() {
     showMenu();
