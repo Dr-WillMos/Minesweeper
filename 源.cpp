@@ -1,42 +1,42 @@
-#include <easyx.h>  // EasyXÍ¼ĞÎ¿â£¬°²×°·½Ê½Çë¼û¹ÙÍøÎÄµµ
+#include <easyx.h>  // EasyXå›¾å½¢åº“ï¼Œå®‰è£…æ–¹å¼è¯·è§å®˜ç½‘æ–‡æ¡£
 #include <stdio.h>
-#include <time.h>       //¼ÆÊ±¿â
-#include <windows.h> //windowsµÄ¿â£¬ÓÃÓÚ»ñÈ¡Ê±¼ä´Á
+#include <time.h>       //è®¡æ—¶åº“
+#include <windows.h> //windowsçš„åº“ï¼Œç”¨äºè·å–æ—¶é—´æˆ³
 
 #define MAX_ROW 20
-#define MAX_COL 20  //ÒÔ×î´óÀ×Çø×÷Îª³£Á¿
-#define IMG_SIZE 40     // Õâ¸öÊı×ÖÓÃÓÚÊµÏÖ´Ó¶şÎ¬Êı×éµ½ÓÎÏ·´°¿ÚµÄ×ø±ê×ª»¯
+#define MAX_COL 20  //ä»¥æœ€å¤§é›·åŒºä½œä¸ºå¸¸é‡
+#define IMG_SIZE 40     // è¿™ä¸ªæ•°å­—ç”¨äºå®ç°ä»äºŒç»´æ•°ç»„åˆ°æ¸¸æˆçª—å£çš„åæ ‡è½¬åŒ–
 
-IMAGE img[13];           // ÒÔÊı×éµÄ·½Ê½ÒıÈëÍ¼Æ¬
-int mine[MAX_ROW + 2][MAX_COL + 2];  //+2ÊÇÎªÁË½â¾ö±ßÔµÎÊÌâ
+IMAGE img[13];           // ä»¥æ•°ç»„çš„æ–¹å¼å¼•å…¥å›¾ç‰‡
+int mine[MAX_ROW + 2][MAX_COL + 2];  //+2æ˜¯ä¸ºäº†è§£å†³è¾¹ç¼˜é—®é¢˜
 int num = 0;
 int mx;
 int my;
 int ROW = 16, COL = 16, MINE_NUM = 40;
 
-//¶¨ÒåÊ±¼ä³£Á¿
+//å®šä¹‰æ—¶é—´å¸¸é‡
 time_t start_time;
 time_t current_time;
 int elapsed_time;
-bool isFirstClickDone = false;          //Ò»¸ö²¼¶ûÖµ£¬ÓÃÀ´ÅĞ¶¨ÊÇ·ñ´¥·¢µÚÒ»´Î±£»¤»úÖÆ
+bool isFirstClickDone = false;          //ä¸€ä¸ªå¸ƒå°”å€¼ï¼Œç”¨æ¥åˆ¤å®šæ˜¯å¦è§¦å‘ç¬¬ä¸€æ¬¡ä¿æŠ¤æœºåˆ¶
 
 void gameInit() {
-    // ³õÊ¼»¯Í¼ĞÎ½çÃæ
-    initgraph(IMG_SIZE * ROW + 240, IMG_SIZE * COL);  //´´½¨ÓÎÏ·´°¿Ú
+    // åˆå§‹åŒ–å›¾å½¢ç•Œé¢
+    initgraph(IMG_SIZE * ROW + 240, IMG_SIZE * COL);  //åˆ›å»ºæ¸¸æˆçª—å£
     int mid1 = (IMG_SIZE * ROW + 240) / 2;
     int mid2 = (IMG_SIZE * COL) / 2;
     int y_length = IMG_SIZE * COL;
     int x_length = IMG_SIZE * ROW + 240;
 
-    settextstyle(30, 0, _T("ËÎÌå"));         //ÕâÀïÊÇÒÔ×Ö·û´®µÄ×óÉÏ½Ç×÷Îª»ù×¼
+    settextstyle(30, 0, _T("å®‹ä½“"));         //è¿™é‡Œæ˜¯ä»¥å­—ç¬¦ä¸²çš„å·¦ä¸Šè§’ä½œä¸ºåŸºå‡†
     settextcolor(WHITE);
-    const char* text = "¿ªÊ¼";
+    const char* text = "å¼€å§‹";
 
-    // »ñÈ¡×Ö·û´®µÄ¿í¶ÈºÍ¸ß¶È
+    // è·å–å­—ç¬¦ä¸²çš„å®½åº¦å’Œé«˜åº¦
     int textWidth = textwidth(text);
     int textHeight = textheight(text);
 
-    // ¼ÆËã×Ö·û´®µÄÖĞÑëÎ»ÖÃ
+    // è®¡ç®—å­—ç¬¦ä¸²çš„ä¸­å¤®ä½ç½®
     int centerX = x_length / 2 - textWidth / 2;
     int centerY = y_length / 2 - textHeight / 2;
 
@@ -51,53 +51,53 @@ void gameInit() {
         if (peekmessage(&em, EX_MOUSE)) {
             if (em.message == WM_LBUTTONDOWN) {
                 if (em.x >= centerX && em.x <= centerX + textWidth &&
-                    em.y >= centerY && em.y <= centerY + textHeight) {     // µã»÷¿ªÊ¼£¨´¦ÓÚ×ø±ê·¶Î§ÄÚ£©£¬·ñÔòÓÃ»§ÓÀÔ¶¿¨ÔÚ¸ÃÑ­»·ÄÚ¡£
+                    em.y >= centerY && em.y <= centerY + textHeight) {     // ç‚¹å‡»å¼€å§‹ï¼ˆå¤„äºåæ ‡èŒƒå›´å†…ï¼‰ï¼Œå¦åˆ™ç”¨æˆ·æ°¸è¿œå¡åœ¨è¯¥å¾ªç¯å†…ã€‚
                     break;
                 }
             }
         }
     }
-    // ³õÊ¼»¯¼ÆÊ±Æ÷
+    // åˆå§‹åŒ–è®¡æ—¶å™¨
     start_time = time(NULL);
     current_time = start_time;
     elapsed_time = 0;
 
-    // ÉèÖÃ×ÖÌåºÍÑÕÉ«
-    settextstyle(20, 0, _T("ËÎÌå"));
+    // è®¾ç½®å­—ä½“å’Œé¢œè‰²
+    settextstyle(20, 0, _T("å®‹ä½“"));
     settextcolor(RGB(255, 255, 255));
     outtextxy(IMG_SIZE * ROW + 20, 20, _T("Time: "));
 
-    // ¼ÓÔØÍ¼Æ¬
-    char buf[260] = "";      //ÓÃÓÚ´æ´¢Í¼Æ¬Â·¾¶
+    // åŠ è½½å›¾ç‰‡
+    char buf[260] = "";      //ç”¨äºå­˜å‚¨å›¾ç‰‡è·¯å¾„
     for (int i = 0; i < 12; ++i) {
-        memset(buf, 0, sizeof(buf));//Ã¿´ÎÑ­»·Ç°£¬Ê¹ÓÃ memset º¯Êı½« buf Êı×éÇåÁã
-        sprintf_s(buf, "./img/%d.jpg", i);  //½«Â·¾¶¸ñÊ½»¯
+        memset(buf, 0, sizeof(buf));//æ¯æ¬¡å¾ªç¯å‰ï¼Œä½¿ç”¨ memset å‡½æ•°å°† buf æ•°ç»„æ¸…é›¶
+        sprintf_s(buf, "./img/%d.jpg", i);  //å°†è·¯å¾„æ ¼å¼åŒ–
         loadimage(&img[i], buf, IMG_SIZE, IMG_SIZE);
     }
     //sprintf(buf, "./img/12.jpg");
-   // loadimage(&img[12], buf, 240, IMG_SIZE * COL );        //¼ÓÔØ±³¾°,ÏÈ×¢ÊÍµô¿´¿´Òª²»Òª¼ÓÉÏ
+   // loadimage(&img[12], buf, 240, IMG_SIZE * COL );        //åŠ è½½èƒŒæ™¯,å…ˆæ³¨é‡Šæ‰çœ‹çœ‹è¦ä¸è¦åŠ ä¸Š
 
-                // Éú³ÉËæ»úÊıÖÖ×Ó£¬·ÀÖ¹Ã¿´ÎÓÎÏ·Æô¶¯Ê±ÏàÍ¬µÄËæ»úÊı
+                // ç”Ÿæˆéšæœºæ•°ç§å­ï¼Œé˜²æ­¢æ¯æ¬¡æ¸¸æˆå¯åŠ¨æ—¶ç›¸åŒçš„éšæœºæ•°
     LARGE_INTEGER frequency;
     LARGE_INTEGER start;
     QueryPerformanceFrequency(&frequency);
     QueryPerformanceCounter(&start);
     srand((unsigned int)(start.QuadPart));
 
-    // Éú³ÉÀ×Çø
+    // ç”Ÿæˆé›·åŒº
     int row, col;
-    memset(mine, 0, sizeof(mine));  // Çå¿ÕÀ×Çø
+    memset(mine, 0, sizeof(mine));  // æ¸…ç©ºé›·åŒº
 
-    for (int i = 0; i < MINE_NUM;) {  //Ëæ»úÉú³ÉÀ×
+    for (int i = 0; i < MINE_NUM;) {  //éšæœºç”Ÿæˆé›·
         row = rand() % ROW + 1;
-        col = rand() % COL + 1;        //randº¯Êı£¬1-9Ö®¼äËæ»úÉú³ÉÖµ
+        col = rand() % COL + 1;        //randå‡½æ•°ï¼Œ1-9ä¹‹é—´éšæœºç”Ÿæˆå€¼
         if (mine[row][col] == 0) {
-            mine[row][col] = 9;      //9±íÊ¾µØÀ×
+            mine[row][col] = 9;      //9è¡¨ç¤ºåœ°é›·
             ++i;
         }
     }
 
-    // ¸üĞÂÖÜÎ§Êı×Ö£¨¾Å¹¬¸ñÄÚÀ×µÄÊıÁ¿£©
+    // æ›´æ–°å‘¨å›´æ•°å­—ï¼ˆä¹å®«æ ¼å†…é›·çš„æ•°é‡ï¼‰
     for (int i = 1; i < ROW; ++i) {
         for (int j = 1; j < COL; ++j) {
             if (mine[i][j] == 9) {
@@ -112,44 +112,44 @@ void gameInit() {
         }
     }
 
-    // ¸øËùÓĞ¸ñ×Ó¼ÓÉÏÆ«ÒÆÁ¿£¬·ÀÖ¹Óë±»·­¿ª¸ñ×Ó³åÍ»£¬Ò²ÊÇÒ»ÖÖ¼ÓÃÜÊı¾İ¡£
+    // ç»™æ‰€æœ‰æ ¼å­åŠ ä¸Šåç§»é‡ï¼Œé˜²æ­¢ä¸è¢«ç¿»å¼€æ ¼å­å†²çªï¼Œä¹Ÿæ˜¯ä¸€ç§åŠ å¯†æ•°æ®ã€‚
     for (int i = 1; i < ROW + 1; ++i) {
         for (int j = 1; j < COL + 1; ++j) {
-            mine[i][j] += 20;  //Ö»ÓĞÏÔÊ¾Îª29µÄ²ÅÊÇÀ×£¬ÔÚ20-28Ö®¼äµÄ¶¼ÊÇ·ÇÀ×¸ñ×Ó£¬µã»÷·­¿ª¸ñ×ÓºÍµİ¹é·­¿ª¸ñ×ÓµÄ²Ù×÷¾ÍÊÇ-20
+            mine[i][j] += 20;  //åªæœ‰æ˜¾ç¤ºä¸º29çš„æ‰æ˜¯é›·ï¼Œåœ¨20-28ä¹‹é—´çš„éƒ½æ˜¯éé›·æ ¼å­ï¼Œç‚¹å‡»ç¿»å¼€æ ¼å­å’Œé€’å½’ç¿»å¼€æ ¼å­çš„æ“ä½œå°±æ˜¯-20
         }
     }
 
 }
 
 void showMenu() {
-    initgraph(400, 300);  // ´´½¨²Ëµ¥´°¿Ú
+    initgraph(400, 300);  // åˆ›å»ºèœå•çª—å£
     setbkcolor(WHITE);
     cleardevice();
 
-    settextstyle(20, 0, _T("ËÎÌå"));
+    settextstyle(20, 0, _T("å®‹ä½“"));
     settextcolor(BLACK);
-    outtextxy(150, 50, _T("Ñ¡ÔñÓÎÏ·ÄÑ¶È£º"));
-    outtextxy(150, 100, _T("1. ¼òµ¥"));
-    outtextxy(150, 140, _T("2. ÖĞµÈ"));
-    outtextxy(150, 180, _T("3. À§ÄÑ"));
+    outtextxy(150, 50, _T("é€‰æ‹©æ¸¸æˆéš¾åº¦ï¼š"));
+    outtextxy(150, 100, _T("1. ç®€å•"));
+    outtextxy(150, 140, _T("2. ä¸­ç­‰"));
+    outtextxy(150, 180, _T("3. å›°éš¾"));
 
     while (1) {
         ExMessage em;
         if (peekmessage(&em, EX_MOUSE)) {
             if (em.message == WM_LBUTTONDOWN) {
-                if (em.x > 150 && em.x < 250 && em.y > 100 && em.y < 120) {     // µã»÷¼òµ¥£¨´¦ÓÚ×ø±ê·¶Î§ÄÚ£©
+                if (em.x > 150 && em.x < 250 && em.y > 100 && em.y < 120) {     // ç‚¹å‡»ç®€å•ï¼ˆå¤„äºåæ ‡èŒƒå›´å†…ï¼‰
                     ROW = 9;
                     COL = 9;
                     MINE_NUM = 10;
                     break;
                 }
-                else if (em.x > 150 && em.x < 250 && em.y > 140 && em.y < 160) {   // µã»÷ÖĞµÈ
+                else if (em.x > 150 && em.x < 250 && em.y > 140 && em.y < 160) {   // ç‚¹å‡»ä¸­ç­‰
                     ROW = 16;
                     COL = 16;
                     MINE_NUM = 40;
                     break;
                 }
-                else if (em.x > 150 && em.x < 250 && em.y > 180 && em.y < 200) {    // µã»÷À§ÄÑ
+                else if (em.x > 150 && em.x < 250 && em.y > 180 && em.y < 200) {    // ç‚¹å‡»å›°éš¾
                     ROW = 20;
                     COL = 20;
                     MINE_NUM = 70;
@@ -158,20 +158,20 @@ void showMenu() {
             }
         }
     }
-    closegraph();  // ¹Ø±Õ²Ëµ¥´°¿Ú
+    closegraph();  // å…³é—­èœå•çª—å£
 }
 
 void restartGame() {
-    isFirstClickDone = false;  // ÖØÖÃµÚÒ»´Îµã»÷×´Ì¬±£Ö¤µÚÒ»´Î±£»¤»úÖÆ¡£
-    // ÖØĞÂ³õÊ¼»¯Ëæ»úÊıÖÖ×Ó
+    isFirstClickDone = false;  // é‡ç½®ç¬¬ä¸€æ¬¡ç‚¹å‡»çŠ¶æ€ä¿è¯ç¬¬ä¸€æ¬¡ä¿æŠ¤æœºåˆ¶ã€‚
+    // é‡æ–°åˆå§‹åŒ–éšæœºæ•°ç§å­
     LARGE_INTEGER frequency;
     LARGE_INTEGER start;
     QueryPerformanceFrequency(&frequency);
     QueryPerformanceCounter(&start);
     srand((unsigned int)(start.QuadPart));
     num = 0;
-    start_time = time(NULL);        // ÖØÖÃÓÎÏ·¿ªÊ¼Ê±¼ä
-    elapsed_time = 0;                    // ÖØÖÃ¼ÆÊ±Æ÷
+    start_time = time(NULL);        // é‡ç½®æ¸¸æˆå¼€å§‹æ—¶é—´
+    elapsed_time = 0;                    // é‡ç½®è®¡æ—¶å™¨
     showMenu();
     gameInit();
 }
@@ -179,11 +179,11 @@ void restartGame() {
 
 
 void isOver() {
-    // ¼ì²éÊÇ·ñ±©À×
-    bool isHitMine = false;  //²¼¶ûĞÍ±äÁ¿£¬Ö»ÓĞ0ºÍ1Á½ÖÖĞÎÊ½£¨¼´trueºÍflase£©
+    // æ£€æŸ¥æ˜¯å¦æš´é›·
+    bool isHitMine = false;  //å¸ƒå°”å‹å˜é‡ï¼Œåªæœ‰0å’Œ1ä¸¤ç§å½¢å¼ï¼ˆå³trueå’Œflaseï¼‰
     for (int i = 1; i < ROW + 1; ++i) {
         for (int j = 1; j < COL + 1; ++j) {
-            if (mine[i][j] == 9 && (mine[i][j] < 20 || mine[i][j] > 29)) {  // À×±»·­¿ª
+            if (mine[i][j] == 9 && (mine[i][j] < 20 || mine[i][j] > 29)) {  // é›·è¢«ç¿»å¼€
                 isHitMine = true;
                 break;
             }
@@ -191,51 +191,51 @@ void isOver() {
         if (isHitMine) break;
     }
 
-    // Èç¹û²ÈÀ×
+    // å¦‚æœè¸©é›·
     if (isHitMine) {
-        int ok = MessageBox(GetHWnd(), "»¹ÒªÅÅÀ×Âğ", "ÄãÊ§°ÜÁË", MB_OKCANCEL);  //easyxµÄº¯Êı£¬µ¯³öÏûÏ¢ºĞ×Ó
+        int ok = MessageBox(GetHWnd(), "è¿˜è¦æ’é›·å—", "ä½ å¤±è´¥äº†", MB_OKCANCEL);  //easyxçš„å‡½æ•°ï¼Œå¼¹å‡ºæ¶ˆæ¯ç›’å­
         if (ok == IDOK) {
-            // ÖØÖÃÀ×Çø
+            // é‡ç½®é›·åŒº
             for (int i = 1; i < ROW + 1; ++i) {
                 for (int j = 1; j < COL + 1; ++j) {
                     if (mine[i][j] == 9) {
-                        mine[i][j] += 20;         // ½«À×±ê¼ÇÎªÒÑ·­¿ª
+                        mine[i][j] += 20;         // å°†é›·æ ‡è®°ä¸ºå·²ç¿»å¼€
                     }
                 }
             }
-            restartGame();                         // ÖØĞÂ³õÊ¼»¯À×ÇøºÍÍ¼Ïñ
+            restartGame();                         // é‡æ–°åˆå§‹åŒ–é›·åŒºå’Œå›¾åƒ
         }
         else {
-            exit(-1);  // ÍË³öÓÎÏ·
+            exit(-1);  // é€€å‡ºæ¸¸æˆ
         }
     }
 
-    // Èç¹û·ÇÀ×È«²¿±»·­¿ªÔòÊ¤Àû
-    int uncoveredNonMine = 0;            //·­¿ªµÄ·ÇÀ×¸ñ×ÓÊıÁ¿
+    // å¦‚æœéé›·å…¨éƒ¨è¢«ç¿»å¼€åˆ™èƒœåˆ©
+    int uncoveredNonMine = 0;            //ç¿»å¼€çš„éé›·æ ¼å­æ•°é‡
     for (int i = 1; i < ROW + 1; ++i) {
         for (int j = 1; j < COL + 1; ++j) {
-            if (mine[i][j] < 20 && mine[i][j] != 9) {          // ·ÇÀ×ÇÒÒÑ·­¿ª
+            if (mine[i][j] < 20 && mine[i][j] != 9) {          // éé›·ä¸”å·²ç¿»å¼€
                 uncoveredNonMine++;
             }
         }
     }
 
-    // ÓÎÏ·Ê¤ÀûÌõ¼şÊÇËùÓĞ·ÇÀ×¸ñ×Ó¶¼±»·­¿ª
+    // æ¸¸æˆèƒœåˆ©æ¡ä»¶æ˜¯æ‰€æœ‰éé›·æ ¼å­éƒ½è¢«ç¿»å¼€
     if (uncoveredNonMine == ROW * COL - MINE_NUM) {
-        // ¼ÆËãÒÑÓÃÊ±¼ä
+        // è®¡ç®—å·²ç”¨æ—¶é—´
         elapsed_time = (int)(time(NULL) - start_time);
 
-        // ¸ñÊ½»¯Ê¤ÀûÌáÊ¾ĞÅÏ¢£¬ÏÔÊ¾ºÄÊ±
-        char win_message[100];         //×Ö·ûĞÍÊı×é
-        sprintf_s(win_message, "ÄãÓ®ÁË£¡\nºÄÊ±£º%dÃë", elapsed_time);    //Êä³öÒÑ¾­ÏûºÄµÄÊ±¼ä
+        // æ ¼å¼åŒ–èƒœåˆ©æç¤ºä¿¡æ¯ï¼Œæ˜¾ç¤ºè€—æ—¶
+        char win_message[100];         //å­—ç¬¦å‹æ•°ç»„
+        sprintf_s(win_message, "ä½ èµ¢äº†ï¼\nè€—æ—¶ï¼š%dç§’", elapsed_time);    //è¾“å‡ºå·²ç»æ¶ˆè€—çš„æ—¶é—´
 
-        // µ¯³öÊ¤ÀûÏûÏ¢ºĞ×Ó£¬
-        int ok = MessageBox(GetHWnd(), win_message, "¹§Ï²Äã£¡", MB_OKCANCEL);
+        // å¼¹å‡ºèƒœåˆ©æ¶ˆæ¯ç›’å­ï¼Œ
+        int ok = MessageBox(GetHWnd(), win_message, "æ­å–œä½ ï¼", MB_OKCANCEL);
         if (ok == IDOK) {
-            restartGame();          // ÖØĞÂ³õÊ¼»¯ÓÎÏ·
+            restartGame();          // é‡æ–°åˆå§‹åŒ–æ¸¸æˆ
         }
         else {
-            exit(0);  // ÍË³öÓÎÏ·
+            exit(0);  // é€€å‡ºæ¸¸æˆ
         }
     }
 }
@@ -258,7 +258,7 @@ void gameDraw() {
             }
         }
     }
-    // ÏÔÊ¾¼ÆÊ±Æ÷
+    // æ˜¾ç¤ºè®¡æ—¶å™¨
     char time_str[20];
     sprintf_s(time_str, "%d s", elapsed_time);
     settextcolor(RGB(255, 255, 255));
@@ -267,7 +267,7 @@ void gameDraw() {
     outtextxy(IMG_SIZE * ROW + 110, 20, time_str);
 }
 
-void openNUll(int r, int c) {   //µİ¹éÊµÏÖ¸ñ×ÓÕ¹¿ª
+void openNUll(int r, int c) {   //é€’å½’å®ç°æ ¼å­å±•å¼€
     if (mine[r][c] == 0) {
         for (int i = r - 1; i <= r + 1; ++i) {
             for (int j = c - 1; j <= c + 1; ++j) {
@@ -288,21 +288,21 @@ void mouseClick() {
         my = em.x / IMG_SIZE + 1;
 
         if (em.lbutton) {
-            if (!isFirstClickDone) {  // Ö»ÓĞµ±»¹Î´½øĞĞµÚÒ»´Îµã»÷Ê±£¬Ö´ĞĞµÚÒ»´Îµã»÷Ïà¹ØµÄÀ×Çø³õÊ¼»¯±£»¤Âß¼­
-                isFirstClickDone = true;  // ±ê¼ÇµÚÒ»´Îµã»÷ÒÑÍê³É
+            if (!isFirstClickDone) {  // åªæœ‰å½“è¿˜æœªè¿›è¡Œç¬¬ä¸€æ¬¡ç‚¹å‡»æ—¶ï¼Œæ‰§è¡Œç¬¬ä¸€æ¬¡ç‚¹å‡»ç›¸å…³çš„é›·åŒºåˆå§‹åŒ–ä¿æŠ¤é€»è¾‘
+                isFirstClickDone = true;  // æ ‡è®°ç¬¬ä¸€æ¬¡ç‚¹å‡»å·²å®Œæˆ
 
-                // Éú³ÉÀ×Çø²¢±£»¤µÚÒ»´Îµã»÷¼°ÆäÖÜÎ§£¬²»ÄÜÔÚÖÜÎ§Éú³ÉÀ×
+                // ç”Ÿæˆé›·åŒºå¹¶ä¿æŠ¤ç¬¬ä¸€æ¬¡ç‚¹å‡»åŠå…¶å‘¨å›´ï¼Œä¸èƒ½åœ¨å‘¨å›´ç”Ÿæˆé›·
                 int protectedRow = mx;
                 int protectedCol = my;
 
-                // Ëæ»úÉú³ÉÀ×Çø
+                // éšæœºç”Ÿæˆé›·åŒº
                 int row, col;
                 memset(mine, 0, sizeof(mine));
                 for (int i = 0; i < MINE_NUM;) {
                     row = rand() % ROW + 1;
                     col = rand() % COL + 1;
 
-                    // Ìø¹ıµÚÒ»´Îµã»÷ÇøÓò¼°ÆäÖÜÎ§¾Å¹¬¸ñ
+                    // è·³è¿‡ç¬¬ä¸€æ¬¡ç‚¹å‡»åŒºåŸŸåŠå…¶å‘¨å›´ä¹å®«æ ¼
                     if (row >= protectedRow - 1 && row <= protectedRow + 1 &&
                         col >= protectedCol - 1 && col <= protectedCol + 1) {
                         continue;
@@ -314,7 +314,7 @@ void mouseClick() {
                     }
                 }
 
-                // ¸üĞÂÖÜÎ§Êı×Ö
+                // æ›´æ–°å‘¨å›´æ•°å­—
                 for (int i = 1; i < ROW + 1; ++i) {
                     for (int j = 1; j < COL + 1; ++j) {
                         if (mine[i][j] == 9) {
@@ -329,7 +329,7 @@ void mouseClick() {
                     }
                 }
 
-                // ¼ÓÃÜÀ×Çø
+                // åŠ å¯†é›·åŒº
                 for (int i = 1; i < ROW + 1; ++i) {
                     for (int j = 1; j < COL + 1; ++j) {
                         mine[i][j] += 20;
@@ -337,7 +337,7 @@ void mouseClick() {
                 }
             }
             else {
-                // ·ÇµÚÒ»´Îµã»÷Ê±£¬Õı³£Õ¹¿ªµã»÷µÄ¸ñ×ÓµÈ²Ù×÷
+                // éç¬¬ä¸€æ¬¡ç‚¹å‡»æ—¶ï¼Œæ­£å¸¸å±•å¼€ç‚¹å‡»çš„æ ¼å­ç­‰æ“ä½œ
                 if (mine[mx][my] > 9) {
                     mine[mx][my] -= 20;
                     openNUll(mx, my);
@@ -345,7 +345,7 @@ void mouseClick() {
                 }
             }
         }
-        else if (em.rbutton) {  // Êó±êÓÒ¼ü±ê¼Ç
+        else if (em.rbutton) {  // é¼ æ ‡å³é”®æ ‡è®°
             if (mine[mx][my] > 9 && mine[mx][my] <= 29) {
                 mine[mx][my] += 20;
             }
@@ -358,27 +358,29 @@ void mouseClick() {
 
 
 
-void tips() {                //ÆåÅÌÓÒ·½ÌáÊ¾º¯Êı
+void tips() {                //æ£‹ç›˜å³æ–¹æç¤ºå‡½æ•°
     current_time = time(NULL);
     elapsed_time = (int)(current_time - start_time);
 
     char time_str[20];
     sprintf_s(time_str, "%d s", elapsed_time);
 
-    settextcolor(RGB(255, 255, 255));         //ÉèÖÃÊ±¼ä×ÖÌåÑÕÉ«¡£
-    outtextxy(IMG_SIZE * ROW + 85, 20, time_str);                 //easyxµÄÊä³ö
-    outtextxy(IMG_SIZE * ROW + 15, 50, _T("Êó±ê×ó¼ü£º·­¿ª¸ñ×Ó"));
-    outtextxy(IMG_SIZE * ROW + 15, 80, _T("Êó±êÓÒ¼ü£º±ê¼ÇµØÀ×"));
-    outtextxy(IMG_SIZE * ROW + 15, 110, _T("ËùÓĞµÄ·ÇÀ×¸ñ×Ó¶¼±»´ò¿ª"));
-    outtextxy(IMG_SIZE * ROW + 15, 140, _T("²ÅËãÓÎÏ·Ê¤Àû"));
-    outtextxy(IMG_SIZE * ROW + 15, 170, _T("×£ÄãÓÎÏ·Óä¿ì"));
+    settextcolor(RGB(255, 255, 255));         //è®¾ç½®æ—¶é—´å­—ä½“é¢œè‰²ã€‚
+    outtextxy(IMG_SIZE * ROW + 85, 20, time_str);                 //easyxçš„è¾“å‡º
+    outtextxy(IMG_SIZE * ROW + 15, 50, _T("é¼ æ ‡å·¦é”®ï¼šç¿»å¼€æ ¼å­"));
+    outtextxy(IMG_SIZE * ROW + 15, 80, _T("é¼ æ ‡å³é”®ï¼šæ ‡è®°åœ°é›·"));
+    outtextxy(IMG_SIZE * ROW + 15, 110, _T("æ‰€æœ‰çš„éé›·æ ¼å­éƒ½è¢«æ‰“å¼€"));
+    outtextxy(IMG_SIZE * ROW + 15, 140, _T("æ‰ç®—æ¸¸æˆèƒœåˆ©"));
+    outtextxy(IMG_SIZE * ROW + 15, 170, _T("å¦‚æœæ˜¯ç¬¬ä¸€æ¬¡ç‚¹å‡»"));
+    outtextxy(IMG_SIZE * ROW + 15, 200, _T("éœ€è¦åŒå‡»åŒä¸€æ ¼å­ä¸­å¿ƒ"));
+    outtextxy(IMG_SIZE * ROW + 15, 230, _T("ç¥ä½ æ¸¸æˆæ„‰å¿«"));
 }
 
 
 int main() {
     showMenu();
     gameInit();
-    while (true) {          //²»¶ÏÑ­»·±£Ö¤Êı¾İËæÊ±¸üĞÂ
+    while (true) {          //ä¸æ–­å¾ªç¯ä¿è¯æ•°æ®éšæ—¶æ›´æ–°
         tips();
         mouseClick();
         gameDraw();
